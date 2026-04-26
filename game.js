@@ -226,6 +226,11 @@ const G = {
     this.nextMission();
     this.boardEl.innerHTML = '';
     this.startDrop();
+
+    // Relayout di sicurezza: gestisce cambi di altezza dovuti a URL bar mobile
+    // o a layout finale risolto solo dopo il primo paint
+    requestAnimationFrame(() => requestAnimationFrame(() => this.relayout()));
+    setTimeout(() => this.relayout(), 300);
   },
 
   // Calcolo dimensioni tile e board (vincolato a larghezza E altezza disponibili)
@@ -236,7 +241,10 @@ const G = {
     const ch = parent.clientHeight - 4;
     const tsW = Math.floor((cw - (COLS + 1) * GAP) / COLS);
     const tsH = Math.floor((ch - (ROWS + 1) * GAP) / ROWS);
-    this.ts = Math.max(1, Math.min(tsW, tsH));
+    // Se l'altezza del contenitore non è ancora stata risolta (layout pending), usa solo la larghezza
+    const candidates = [tsW];
+    if (tsH > 0) candidates.push(tsH);
+    this.ts = Math.max(8, Math.min.apply(null, candidates));
     const bw = this.ts * COLS + GAP * (COLS + 1);
     this.bh = this.ts * ROWS + GAP * (ROWS + 1);
     this.boardEl.style.width = bw + 'px';
@@ -677,6 +685,8 @@ function gc() {
       Alpine.store('u').lt = DICT.size + ' parole caricate';
       Alpine.store('u').sc = 'game';
       await Alpine.nextTick();
+      // Doppio rAF: garantisce che il browser abbia completato il layout flex prima di calcSize
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       G.init();
       G.syncHUD();
       Alpine.store('u').tut = true;
@@ -705,6 +715,7 @@ function gc() {
     async restartGame() {
       Alpine.store('u').sc = 'game';
       await Alpine.nextTick();
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       G.init();
       G.syncHUD();
     },

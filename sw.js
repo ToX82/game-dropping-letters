@@ -1,5 +1,5 @@
 // ─── Service Worker: LETTERE — offline-first PWA ─────────
-const VERSION = 'lettere-v1';
+const VERSION = 'lettere-v2';
 const CORE_CACHE = VERSION + '-core';
 const RUNTIME_CACHE = VERSION + '-rt';
 
