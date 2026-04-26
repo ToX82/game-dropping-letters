@@ -228,18 +228,38 @@ const G = {
     this.startDrop();
   },
 
-  // Calcolo dimensioni tile e board
+  // Calcolo dimensioni tile e board (vincolato a larghezza E altezza disponibili)
   calcSize() {
     const parent = this.boardEl?.parentElement;
-    let cw = parent ? parent.clientWidth - 4 : 0;
-    if (cw <= 0) {
-      cw = Math.min(window.innerWidth - 24, 448) - 4;
-      console.log('[calcSize] Fallback window-based cw=' + cw);
-    }
-    this.ts = Math.max(1, Math.floor((cw - (COLS + 1) * GAP) / COLS));
+    if (!parent) return;
+    const cw = parent.clientWidth - 4;
+    const ch = parent.clientHeight - 4;
+    const tsW = Math.floor((cw - (COLS + 1) * GAP) / COLS);
+    const tsH = Math.floor((ch - (ROWS + 1) * GAP) / ROWS);
+    this.ts = Math.max(1, Math.min(tsW, tsH));
+    const bw = this.ts * COLS + GAP * (COLS + 1);
     this.bh = this.ts * ROWS + GAP * (ROWS + 1);
-    this.boardEl.style.width = cw + 'px';
+    this.boardEl.style.width = bw + 'px';
     this.boardEl.style.height = this.bh + 'px';
+  },
+
+  // Riposiziona/ridimensiona tutte le tile esistenti (per resize/orientation change)
+  relayout() {
+    const prev = this.ts;
+    this.calcSize();
+    if (this.ts === prev) return;
+    const s = this.ts;
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        const t = this.board[c][r];
+        if (!t) continue;
+        t.el.style.width = s + 'px';
+        t.el.style.height = s + 'px';
+        t.el.style.fontSize = (s * .45) + 'px';
+        t.el.style.left = (GAP + c * (s + GAP)) + 'px';
+        t.el.style.top = (GAP + (ROWS - 1 - r) * (s + GAP)) + 'px';
+      }
+    }
   },
 
   // Avvia il timer di cadenza lettere
@@ -566,6 +586,26 @@ const G = {
     clearTimeout(this.comboTimer);
   }
 };
+
+// ─── Resize / orientation handling ────────────────────────
+let _rzT = 0;
+function _onResize() {
+  clearTimeout(_rzT);
+  _rzT = setTimeout(() => {
+    if (Alpine.store && Alpine.store('u') && Alpine.store('u').sc === 'game' && G.boardEl) {
+      G.relayout();
+      G.checkDanger();
+    }
+  }, 120);
+}
+window.addEventListener('resize', _onResize, { passive: true });
+window.addEventListener('orientationchange', _onResize, { passive: true });
+
+// Previeni gesti di zoom/pinch sul gioco (iOS Safari)
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => {
+  if (e.target.closest && e.target.closest('.game-screen')) e.preventDefault();
+}, { passive: false });
 
 // ─── Alpine store (stato reattivo UI) ─────────────────────
 document.addEventListener('alpine:init', () => {
