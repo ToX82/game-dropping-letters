@@ -1,6 +1,87 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;width:100%;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;touch-action:manipulation}
 body{position:fixed;inset:0}
+
+/* ─── Theme (light/dark/system) ──────────────────────────── */
+:root{color-scheme:dark}
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+
+:root[data-theme="light"] body{
+  background:#f6f7fb !important;
+  color:#0b1020 !important;
+}
+:root[data-theme="light"] .text-txt{color:#0b1020 !important}
+:root[data-theme="light"] .text-muted{color:rgba(11,16,32,.55) !important}
+:root[data-theme="light"] .text-muted\\/50{color:rgba(11,16,32,.45) !important}
+:root[data-theme="light"] .text-muted\\/30{color:rgba(11,16,32,.28) !important}
+:root[data-theme="light"] .text-muted\\/80{color:rgba(11,16,32,.62) !important}
+
+:root[data-theme="light"] .bg-deep{background-color:#f6f7fb !important}
+:root[data-theme="light"] .bg-base{background-color:#f1f3ff !important}
+:root[data-theme="light"] .bg-surface{background-color:#ffffff !important}
+:root[data-theme="light"] .bg-elevated{background-color:#eef1ff !important}
+
+/* Tailwind opacity variants used by overlays/modals */
+:root[data-theme="light"] .bg-deep\\/70{background-color:rgba(246,247,251,.70) !important}
+:root[data-theme="light"] .bg-deep\\/80{background-color:rgba(246,247,251,.82) !important}
+:root[data-theme="light"] .bg-deep\\/90{background-color:rgba(246,247,251,.92) !important}
+:root[data-theme="light"] .bg-elevated\\/50{background-color:rgba(238,241,255,.78) !important}
+:root[data-theme="light"] .bg-elevated\\/60{background-color:rgba(238,241,255,.88) !important}
+
+:root[data-theme="light"] .border-brd{border-color:rgba(14,14,30,.14) !important}
+:root[data-theme="light"] .border-brd\\/50{border-color:rgba(14,14,30,.10) !important}
+:root[data-theme="light"] .border-brd\\/40{border-color:rgba(14,14,30,.10) !important}
+
+:root[data-theme="light"] .shadow-2xl{box-shadow:0 18px 50px rgba(11,16,32,.16) !important}
+:root[data-theme="light"] .obg{backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15)}
+:root[data-theme="light"] .bgb{opacity:.12}
+:root[data-theme="light"] .b1{background:#00b894}
+:root[data-theme="light"] .b2{background:#ffab00}
+
+:root[data-theme="light"] .bf{
+  border-color:rgba(14,14,30,.14) !important;
+  background:linear-gradient(180deg,#ffffff,#f1f3ff) !important;
+  box-shadow:0 0 40px rgba(0,212,170,.05) !important;
+}
+
+:root[data-theme="light"] .tl{
+  color:#0b1020 !important;
+  background:linear-gradient(145deg,#ffffff,#f0f2ff) !important;
+  border-color:rgba(14,14,30,.14) !important;
+}
+:root[data-theme="light"] .tl.sl{
+  background:linear-gradient(145deg,rgba(0,212,170,.20),rgba(0,212,170,.07)) !important;
+  border-color:#00b894 !important;
+  box-shadow:0 0 14px rgba(0,212,170,.22),inset 0 0 8px rgba(0,212,170,.08) !important;
+  color:#007e66 !important;
+}
+:root[data-theme="light"] .tl.wr{border-bottom-color:rgba(255,71,87,.55) !important}
+
+:root[data-theme="light"] .wb{
+  background:rgba(255,255,255,.9) !important;
+  border-color:rgba(14,14,30,.14) !important;
+}
+
+:root[data-theme="light"] .btn-sec{
+  background:rgba(255,255,255,.9) !important;
+  color:#0b1020 !important;
+  border-color:rgba(14,14,30,.18) !important;
+}
+:root[data-theme="light"] .btn-sec:active{background:#eef1ff !important}
+
+/* Modals in light theme (avoid Tailwind opacity edge-cases) */
+:root[data-theme="light"] .modal-overlay{
+  background:rgba(246,247,251,.85) !important;
+}
+:root[data-theme="light"] .modal-card{
+  background:rgba(255,255,255,.92) !important;
+  border-color:rgba(14,14,30,.14) !important;
+  color:#0b1020 !important;
+}
+:root[data-theme="light"] .stat-card{
+  background:rgba(238,241,255,.90) !important;
+}
 .app{height:100dvh;height:100vh;height:100svh;height:100dvh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);overflow:hidden}
 .game-screen{user-select:none;-webkit-user-select:none;touch-action:none}
 .bgb{position:fixed;border-radius:50%;filter:blur(120px);opacity:.1;pointer-events:none;z-index:0}

@@ -245,8 +245,10 @@ const G = {
     const candidates = [tsW];
     if (tsH > 0) candidates.push(tsH);
     this.ts = Math.max(8, Math.min.apply(null, candidates));
-    const bw = this.ts * COLS + GAP * (COLS + 1);
-    this.bh = this.ts * ROWS + GAP * (ROWS + 1);
+    // Niente GAP "esterno": solo spazi tra tile.
+    // Questo fa arrivare l'ultima riga fino al bordo inferiore del frame.
+    const bw = this.ts * COLS + GAP * (COLS - 1);
+    this.bh = this.ts * ROWS + GAP * (ROWS - 1);
     this.boardEl.style.width = bw + 'px';
     this.boardEl.style.height = this.bh + 'px';
   },
@@ -264,8 +266,8 @@ const G = {
         t.el.style.width = s + 'px';
         t.el.style.height = s + 'px';
         t.el.style.fontSize = (s * .45) + 'px';
-        t.el.style.left = (GAP + c * (s + GAP)) + 'px';
-        t.el.style.top = (GAP + (ROWS - 1 - r) * (s + GAP)) + 'px';
+        t.el.style.left = (c * (s + GAP)) + 'px';
+        t.el.style.top = ((ROWS - 1 - r) * (s + GAP)) + 'px';
       }
     }
   },
@@ -301,7 +303,7 @@ const G = {
     el.style.width = s + 'px';
     el.style.height = s + 'px';
     el.style.fontSize = (s * .45) + 'px';
-    el.style.left = (GAP + col * (s + GAP)) + 'px';
+    el.style.left = (col * (s + GAP)) + 'px';
     el.style.top = (-s - 10) + 'px';
 
     el.addEventListener('pointerdown', e => {
@@ -317,7 +319,7 @@ const G = {
     // Animazione caduta
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        el.style.top = (GAP + (ROWS - 1 - row) * (s + GAP)) + 'px';
+        el.style.top = ((ROWS - 1 - row) * (s + GAP)) + 'px';
         setTimeout(() => el.classList.add('ln'), 350);
       });
     });
@@ -451,7 +453,7 @@ const G = {
             this.board[c][wr] = this.board[c][r];
             this.board[c][r] = null;
             this.board[c][wr].el.dataset.row = wr;
-            this.board[c][wr].el.style.top = (GAP + (ROWS - 1 - wr) * (this.ts + GAP)) + 'px';
+            this.board[c][wr].el.style.top = ((ROWS - 1 - wr) * (this.ts + GAP)) + 'px';
             setTimeout(() => this.board[c][wr]?.el.classList.add('ln'), 350);
           }
           wr++;
@@ -647,6 +649,47 @@ document.addEventListener('alpine:init', () => {
 // ─── Alpine component (collegamento HTML ↔ motore) ────────
 function gc() {
   return {
+    theme: 'system',
+
+    get themeIcon() {
+      if (this.theme === 'dark') return 'fas fa-moon';
+      if (this.theme === 'light') return 'fas fa-sun';
+      return 'fas fa-circle-half-stroke';
+    },
+
+    _sysMql: null,
+
+    initTheme() {
+      const saved = (localStorage.getItem('letters_theme') || '').trim();
+      this.theme = saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'system';
+
+      this._sysMql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+      if (this._sysMql && this._sysMql.addEventListener) {
+        this._sysMql.addEventListener('change', () => {
+          if (this.theme === 'system') this.applyTheme();
+        });
+      }
+
+      this.applyTheme();
+    },
+
+    applyTheme() {
+      const root = document.documentElement;
+      const isSystemDark = !!(this._sysMql && this._sysMql.matches);
+      const effective = this.theme === 'system' ? (isSystemDark ? 'dark' : 'light') : this.theme;
+
+      root.dataset.theme = effective;
+
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', effective === 'dark' ? '#08080e' : '#f6f7fb');
+    },
+
+    cycleTheme() {
+      this.theme = this.theme === 'system' ? 'dark' : (this.theme === 'dark' ? 'light' : 'system');
+      localStorage.setItem('letters_theme', this.theme);
+      this.applyTheme();
+    },
+
     get wbc() {
       const u = Alpine.store('u');
       if (u.cw && u.iv && u.cb > 1) return 'cb';

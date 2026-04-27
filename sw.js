@@ -1,5 +1,5 @@
 // ─── Service Worker: LETTERE — offline-first PWA ─────────
-const VERSION = 'lettere-v2';
+const VERSION = 'lettere-v4';
 const CORE_CACHE = VERSION + '-core';
 const RUNTIME_CACHE = VERSION + '-rt';
 
@@ -152,9 +152,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Same-origin: cache-first
+  // Same-origin:
+  // - navigations handled sopra (network-first)
+  // - asset statici: stale-while-revalidate per ricevere update senza bust manuali
   if (url.origin === self.location.origin) {
-    event.respondWith(cacheFirst(event));
+    event.respondWith(staleWhileRevalidate(event));
     return;
   }
 

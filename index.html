@@ -23,7 +23,7 @@
 <body class="bg-deep font-body text-txt">
 <div class="bgb b1"></div>
 <div class="bgb b2"></div>
-<div x-data="gc()" class="app relative z-10 w-full max-w-md mx-auto flex flex-col items-stretch" @keydown.window="onKey($event)">
+<div x-data="gc()" x-init="initTheme()" class="app relative z-10 w-full max-w-md mx-auto flex flex-col items-stretch" @keydown.window="onKey($event)">
 
 <div x-show="$store.u.sc==='intro'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="flex flex-col items-center justify-center flex-1 text-center gap-4 px-4">
   <div class="text-accent text-xs font-semibold tracking-[.25em] uppercase">Puzzle Arcade</div>
@@ -50,6 +50,9 @@
       </span>
     </div>
     <div class="flex items-center gap-3 shrink-0">
+      <button @click="cycleTheme()" class="text-muted active:text-txt transition-colors text-base p-1 -m-1" aria-label="Tema">
+        <i :class="themeIcon"></i>
+      </button>
       <button @click="togglePause()" class="text-muted active:text-txt transition-colors text-base p-1 -m-1" aria-label="Pausa"><i class="fas fa-pause"></i></button>
       <button @click="toggleAudio()" class="text-muted active:text-txt transition-colors text-base p-1 -m-1" aria-label="Audio"><i :class="$store.u.au?'fas fa-volume-high':'fas fa-volume-xmark'"></i></button>
     </div>
@@ -60,7 +63,7 @@
     <span class="text-[10px] text-muted leading-tight" x-text="$store.u.mp"></span>
   </div>
 
-  <div class="bf flex-1 min-h-0 mx-auto w-full flex items-center justify-center" :class="{'dg':$store.u.dl==='danger','cr':$store.u.dl==='critical'}">
+  <div class="bf flex-1 min-h-0 mx-auto w-full flex items-end justify-center pb-2" :class="{'dg':$store.u.dl==='danger','cr':$store.u.dl==='critical'}">
     <div id="board" class="bd"></div>
   </div>
 
@@ -77,8 +80,8 @@
   </div>
 </div>
 
-<div x-show="$store.u.sc==='paused'" x-transition class="fixed inset-0 bg-deep/80 obg z-50 flex items-center justify-center p-4" @click.self="resumeGame()">
-  <div class="bg-surface border border-brd rounded-2xl p-6 text-center max-w-xs w-full shadow-2xl">
+<div x-show="$store.u.sc==='paused'" x-transition class="modal-overlay fixed inset-0 bg-deep/80 obg z-50 flex items-center justify-center p-4" @click.self="resumeGame()">
+  <div class="modal-card bg-surface border border-brd rounded-2xl p-6 text-center max-w-xs w-full shadow-2xl">
     <h2 class="font-display text-2xl font-bold mb-4">Pausa</h2>
     <div class="space-y-2">
       <button @click="resumeGame()" class="btn-go w-full">Riprendi</button>
@@ -87,15 +90,15 @@
   </div>
 </div>
 
-<div x-show="$store.u.sc==='gameover'" x-transition class="fixed inset-0 bg-deep/90 obg z-50 flex items-center justify-center p-4 overflow-y-auto">
-  <div class="bg-surface border border-brd rounded-2xl p-5 text-center max-w-sm w-full shadow-2xl my-auto">
+<div x-show="$store.u.sc==='gameover'" x-transition class="modal-overlay fixed inset-0 bg-deep/90 obg z-50 flex items-center justify-center p-4 overflow-y-auto">
+  <div class="modal-card bg-surface border border-brd rounded-2xl p-5 text-center max-w-sm w-full shadow-2xl my-auto">
     <h2 class="font-display text-2xl font-black text-danger">Fine Partita</h2>
     <div class="font-display text-4xl font-black text-gold leading-none mt-2" x-text="$store.u.fs"></div>
     <div class="text-muted text-[10px] tracking-widest uppercase mt-1">Punti</div>
     <div class="grid grid-cols-3 gap-2 mt-3">
-      <div class="bg-elevated/50 rounded-xl py-2"><div class="font-display text-base font-bold" x-text="$store.u.fw"></div><div class="text-[9px] text-muted">Parole</div></div>
-      <div class="bg-elevated/50 rounded-xl py-2"><div class="font-display text-base font-bold" x-text="$store.u.fl"></div><div class="text-[9px] text-muted">Pi&ugrave; lunga</div></div>
-      <div class="bg-elevated/50 rounded-xl py-2"><div class="font-display text-base font-bold text-gold" x-text="'x'+$store.u.fb"></div><div class="text-[9px] text-muted">Combo max</div></div>
+      <div class="stat-card bg-elevated/50 rounded-xl py-2"><div class="font-display text-base font-bold" x-text="$store.u.fw"></div><div class="text-[9px] text-muted">Parole</div></div>
+      <div class="stat-card bg-elevated/50 rounded-xl py-2"><div class="font-display text-base font-bold" x-text="$store.u.fl"></div><div class="text-[9px] text-muted">Pi&ugrave; lunga</div></div>
+      <div class="stat-card bg-elevated/50 rounded-xl py-2"><div class="font-display text-base font-bold text-gold" x-text="'x'+$store.u.fb"></div><div class="text-[9px] text-muted">Combo max</div></div>
     </div>
     <div class="text-[11px] text-muted mt-2">Livello: <span class="text-accent font-semibold" x-text="$store.u.fv"></span></div>
     <div class="border-t border-brd/40 my-3"></div>
@@ -106,8 +109,8 @@
   </div>
 </div>
 
-<div x-show="$store.u.tut" x-transition class="fixed inset-0 bg-deep/70 obg z-40 flex items-end sm:items-center justify-center p-4" @click.self="$store.u.tut=false">
-  <div @click.stop class="bg-surface border border-brd rounded-2xl p-5 max-w-sm w-full space-y-3 shadow-2xl">
+<div x-show="$store.u.tut" x-transition class="modal-overlay fixed inset-0 bg-deep/70 obg z-40 flex items-end sm:items-center justify-center p-4" @click.self="$store.u.tut=false">
+  <div @click.stop class="modal-card bg-surface border border-brd rounded-2xl p-5 max-w-sm w-full space-y-3 shadow-2xl">
     <h3 class="font-display text-lg font-bold">Come si gioca</h3>
     <div class="text-sm text-muted space-y-2 leading-relaxed">
       <p><span class="text-accent font-bold">1.</span> Le lettere cadono e si accumulano</p>
